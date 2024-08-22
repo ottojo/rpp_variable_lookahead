@@ -23,7 +23,7 @@
 #include "nav2_costmap_2d/costmap_2d.hpp"
 #include "nav2_util/lifecycle_node.hpp"
 #include "path_utils/path_utils.hpp"
-#include "nav2_regulated_pure_pursuit_controller/regulated_pure_pursuit_controller.hpp"
+#include "rpp_variable_lookahead_controller/rpp_variable_lookahead_controller.hpp"
 #include "nav2_costmap_2d/costmap_filters/filter_values.hpp"
 #include "nav2_core/controller_exceptions.hpp"
 
@@ -35,11 +35,11 @@ public:
 };
 RclCppFixture g_rclcppfixture;
 
-class BasicAPIRPP : public nav2_regulated_pure_pursuit_controller::RegulatedPurePursuitController
+class BasicAPIRPP : public rpp_variable_lookahead_controller::VariableLookaheadRPP
 {
 public:
   BasicAPIRPP()
-  : nav2_regulated_pure_pursuit_controller::RegulatedPurePursuitController() {}
+  : rpp_variable_lookahead_controller::VariableLookaheadRPP() {}
 
   nav_msgs::msg::Path getPlan() {return path_handler_->getPlan();}
 
@@ -583,7 +583,7 @@ TEST(RegulatedPurePursuitTest, testDynamicParameter)
   auto costmap = std::make_shared<nav2_costmap_2d::Costmap2DROS>("global_costmap");
   costmap->on_configure(rclcpp_lifecycle::State());
   auto ctrl =
-    std::make_unique<nav2_regulated_pure_pursuit_controller::RegulatedPurePursuitController>();
+    std::make_unique<rpp_variable_lookahead_controller::VariableLookaheadRPP>();
   auto tf = std::make_shared<tf2_ros::Buffer>(node->get_clock());
   ctrl->configure(node, "test", tf, costmap);
   ctrl->activate();

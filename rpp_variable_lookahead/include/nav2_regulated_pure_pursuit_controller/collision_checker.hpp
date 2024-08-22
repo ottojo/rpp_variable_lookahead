@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef NAV2_REGULATED_PURE_PURSUIT_CONTROLLER__COLLISION_CHECKER_HPP_
-#define NAV2_REGULATED_PURE_PURSUIT_CONTROLLER__COLLISION_CHECKER_HPP_
+#ifndef RPP_VARIABLE_LOOKAHEAD_CONTROLLER__COLLISION_CHECKER_HPP_
+#define RPP_VARIABLE_LOOKAHEAD_CONTROLLER__COLLISION_CHECKER_HPP_
 
 #include <string>
 #include <vector>
@@ -26,32 +26,32 @@
 #include "nav2_costmap_2d/footprint_collision_checker.hpp"
 #include "nav2_util/odometry_utils.hpp"
 #include "geometry_msgs/msg/pose2_d.hpp"
-#include "nav2_regulated_pure_pursuit_controller/parameter_handler.hpp"
+#include "rpp_variable_lookahead_controller/parameter_handler.hpp"
 
 #include "nav2_core/controller_exceptions.hpp"
 #include "nav2_util/node_utils.hpp"
 #include "nav2_util/geometry_utils.hpp"
 #include "nav2_costmap_2d/costmap_filters/filter_values.hpp"
 
-namespace nav2_regulated_pure_pursuit_controller
+namespace rpp_variable_lookahead_controller
 {
 
 /**
- * @class nav2_regulated_pure_pursuit_controller::CollisionChecker
+ * @class rpp_variable_lookahead_controller::CollisionChecker
  * @brief Checks for collision based on a RPP control command
  */
 class CollisionChecker
 {
 public:
   /**
-   * @brief Constructor for nav2_regulated_pure_pursuit_controller::CollisionChecker
+   * @brief Constructor for rpp_variable_lookahead_controller::CollisionChecker
    */
   CollisionChecker(
     rclcpp_lifecycle::LifecycleNode::SharedPtr node,
     std::shared_ptr<nav2_costmap_2d::Costmap2DROS> costmap_ros, Parameters * params);
 
   /**
-   * @brief Destrructor for nav2_regulated_pure_pursuit_controller::CollisionChecker
+   * @brief Destrructor for rpp_variable_lookahead_controller::CollisionChecker
    */
   ~CollisionChecker() = default;
 
@@ -100,6 +100,6 @@ protected:
   rclcpp::Clock::SharedPtr clock_;
 };
 
-}  // namespace nav2_regulated_pure_pursuit_controller
+}  // namespace rpp_variable_lookahead_controller
 
-#endif  // NAV2_REGULATED_PURE_PURSUIT_CONTROLLER__COLLISION_CHECKER_HPP_
+#endif  // RPP_VARIABLE_LOOKAHEAD_CONTROLLER__COLLISION_CHECKER_HPP_

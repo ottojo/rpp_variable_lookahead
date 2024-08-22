@@ -13,8 +13,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef NAV2_REGULATED_PURE_PURSUIT_CONTROLLER__REGULATED_PURE_PURSUIT_CONTROLLER_HPP_
-#define NAV2_REGULATED_PURE_PURSUIT_CONTROLLER__REGULATED_PURE_PURSUIT_CONTROLLER_HPP_
+#ifndef RPP_VARIABLE_LOOKAHEAD_CONTROLLER__RPP_VARIABLE_LOOKAHEAD_CONTROLLER_HPP_
+#define RPP_VARIABLE_LOOKAHEAD_CONTROLLER__RPP_VARIABLE_LOOKAHEAD_CONTROLLER_HPP_
 
 #include <string>
 #include <vector>
@@ -27,30 +27,30 @@
 #include "pluginlib/class_loader.hpp"
 #include "pluginlib/class_list_macros.hpp"
 #include "geometry_msgs/msg/pose2_d.hpp"
-#include "nav2_regulated_pure_pursuit_controller/path_handler.hpp"
-#include "nav2_regulated_pure_pursuit_controller/collision_checker.hpp"
-#include "nav2_regulated_pure_pursuit_controller/parameter_handler.hpp"
-#include "nav2_regulated_pure_pursuit_controller/regulation_functions.hpp"
+#include "rpp_variable_lookahead_controller/path_handler.hpp"
+#include "rpp_variable_lookahead_controller/collision_checker.hpp"
+#include "rpp_variable_lookahead_controller/parameter_handler.hpp"
+#include "rpp_variable_lookahead_controller/regulation_functions.hpp"
 
-namespace nav2_regulated_pure_pursuit_controller
+namespace rpp_variable_lookahead_controller
 {
 
 /**
- * @class nav2_regulated_pure_pursuit_controller::RegulatedPurePursuitController
+ * @class rpp_variable_lookahead_controller::VariableLookaheadRPP
  * @brief Regulated pure pursuit controller plugin
  */
-class RegulatedPurePursuitController : public nav2_core::Controller
+class VariableLookaheadRPP : public nav2_core::Controller
 {
 public:
   /**
-   * @brief Constructor for nav2_regulated_pure_pursuit_controller::RegulatedPurePursuitController
+   * @brief Constructor for rpp_variable_lookahead_controller::VariableLookaheadRPP
    */
-  RegulatedPurePursuitController() = default;
+  VariableLookaheadRPP() = default;
 
   /**
-   * @brief Destrructor for nav2_regulated_pure_pursuit_controller::RegulatedPurePursuitController
+   * @brief Destrructor for rpp_variable_lookahead_controller::VariableLookaheadRPP
    */
-  ~RegulatedPurePursuitController() override = default;
+  ~VariableLookaheadRPP() override = default;
 
   /**
    * @brief Configure controller state machine
@@ -201,7 +201,7 @@ protected:
   std::string plugin_name_;
   std::shared_ptr<nav2_costmap_2d::Costmap2DROS> costmap_ros_;
   nav2_costmap_2d::Costmap2D * costmap_;
-  rclcpp::Logger logger_ {rclcpp::get_logger("RegulatedPurePursuitController")};
+  rclcpp::Logger logger_ {rclcpp::get_logger("VariableLookaheadRPP")};
 
   Parameters * params_;
   double goal_dist_tol_;
@@ -211,11 +211,11 @@ protected:
   std::shared_ptr<rclcpp_lifecycle::LifecyclePublisher<geometry_msgs::msg::PointStamped>>
   carrot_pub_;
   std::shared_ptr<rclcpp_lifecycle::LifecyclePublisher<nav_msgs::msg::Path>> carrot_arc_pub_;
-  std::unique_ptr<nav2_regulated_pure_pursuit_controller::PathHandler> path_handler_;
-  std::unique_ptr<nav2_regulated_pure_pursuit_controller::ParameterHandler> param_handler_;
-  std::unique_ptr<nav2_regulated_pure_pursuit_controller::CollisionChecker> collision_checker_;
+  std::unique_ptr<rpp_variable_lookahead_controller::PathHandler> path_handler_;
+  std::unique_ptr<rpp_variable_lookahead_controller::ParameterHandler> param_handler_;
+  std::unique_ptr<rpp_variable_lookahead_controller::CollisionChecker> collision_checker_;
 };
 
-}  // namespace nav2_regulated_pure_pursuit_controller
+}  // namespace rpp_variable_lookahead_controller
 
-#endif  // NAV2_REGULATED_PURE_PURSUIT_CONTROLLER__REGULATED_PURE_PURSUIT_CONTROLLER_HPP_
+#endif  // RPP_VARIABLE_LOOKAHEAD_CONTROLLER__RPP_VARIABLE_LOOKAHEAD_CONTROLLER_HPP_

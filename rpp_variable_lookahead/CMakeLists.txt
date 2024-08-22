@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.5)
-project(nav2_regulated_pure_pursuit_controller)
+project(rpp_variable_lookahead_controller)
 
 find_package(ament_cmake REQUIRED)
 find_package(nav2_common REQUIRED)
@@ -32,10 +32,10 @@ set(dependencies
   tf2_geometry_msgs
 )
 
-set(library_name nav2_regulated_pure_pursuit_controller)
+set(library_name rpp_variable_lookahead_controller)
 
 add_library(${library_name} SHARED
-        src/regulated_pure_pursuit_controller.cpp
+        src/rpp_variable_lookahead_controller.cpp
         src/collision_checker.cpp
         src/parameter_handler.cpp
         src/path_handler.cpp)
@@ -66,7 +66,7 @@ ament_export_include_directories(include)
 ament_export_libraries(${library_name})
 ament_export_dependencies(${dependencies})
 
-pluginlib_export_plugin_description_file(nav2_core nav2_regulated_pure_pursuit_controller.xml)
+pluginlib_export_plugin_description_file(nav2_core rpp_variable_lookahead.xml)
 
 ament_package()
 

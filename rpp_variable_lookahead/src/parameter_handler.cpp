@@ -19,9 +19,9 @@
 #include <vector>
 #include <utility>
 
-#include "nav2_regulated_pure_pursuit_controller/parameter_handler.hpp"
+#include "rpp_variable_lookahead_controller/parameter_handler.hpp"
 
-namespace nav2_regulated_pure_pursuit_controller
+namespace rpp_variable_lookahead_controller
 {
 
 using nav2_util::declare_parameter_if_not_declared;
@@ -279,4 +279,4 @@ ParameterHandler::dynamicParametersCallback(
   return result;
 }
 
-}  // namespace nav2_regulated_pure_pursuit_controller
+}  // namespace rpp_variable_lookahead_controller

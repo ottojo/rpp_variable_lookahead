@@ -20,7 +20,7 @@
 #include <vector>
 #include <utility>
 
-#include "nav2_regulated_pure_pursuit_controller/regulated_pure_pursuit_controller.hpp"
+#include "rpp_variable_lookahead_controller/rpp_variable_lookahead_controller.hpp"
 #include "nav2_core/controller_exceptions.hpp"
 #include "nav2_util/node_utils.hpp"
 #include "nav2_util/geometry_utils.hpp"
@@ -32,10 +32,10 @@ using std::max;
 using std::abs;
 using namespace nav2_costmap_2d;  // NOLINT
 
-namespace nav2_regulated_pure_pursuit_controller
+namespace rpp_variable_lookahead_controller
 {
 
-void RegulatedPurePursuitController::configure(
+void VariableLookaheadRPP::configure(
   const rclcpp_lifecycle::LifecycleNode::WeakPtr & parent,
   std::string name, std::shared_ptr<tf2_ros::Buffer> tf,
   std::shared_ptr<nav2_costmap_2d::Costmap2DROS> costmap_ros)
@@ -75,40 +75,40 @@ void RegulatedPurePursuitController::configure(
   carrot_pub_ = node->create_publisher<geometry_msgs::msg::PointStamped>("lookahead_point", 1);
 }
 
-void RegulatedPurePursuitController::cleanup()
+void VariableLookaheadRPP::cleanup()
 {
   RCLCPP_INFO(
     logger_,
     "Cleaning up controller: %s of type"
-    " regulated_pure_pursuit_controller::RegulatedPurePursuitController",
+    " rpp_variable_lookahead_controller::VariableLookaheadRPP",
     plugin_name_.c_str());
   global_path_pub_.reset();
   carrot_pub_.reset();
 }
 
-void RegulatedPurePursuitController::activate()
+void VariableLookaheadRPP::activate()
 {
   RCLCPP_INFO(
     logger_,
     "Activating controller: %s of type "
-    "regulated_pure_pursuit_controller::RegulatedPurePursuitController",
+    "rpp_variable_lookahead_controller::VariableLookaheadRPP",
     plugin_name_.c_str());
   global_path_pub_->on_activate();
   carrot_pub_->on_activate();
 }
 
-void RegulatedPurePursuitController::deactivate()
+void VariableLookaheadRPP::deactivate()
 {
   RCLCPP_INFO(
     logger_,
     "Deactivating controller: %s of type "
-    "regulated_pure_pursuit_controller::RegulatedPurePursuitController",
+    "rpp_variable_lookahead_controller::VariableLookaheadRPP",
     plugin_name_.c_str());
   global_path_pub_->on_deactivate();
   carrot_pub_->on_deactivate();
 }
 
-std::unique_ptr<geometry_msgs::msg::PointStamped> RegulatedPurePursuitController::createCarrotMsg(
+std::unique_ptr<geometry_msgs::msg::PointStamped> VariableLookaheadRPP::createCarrotMsg(
   const geometry_msgs::msg::PoseStamped & carrot_pose)
 {
   auto carrot_msg = std::make_unique<geometry_msgs::msg::PointStamped>();
@@ -119,7 +119,7 @@ std::unique_ptr<geometry_msgs::msg::PointStamped> RegulatedPurePursuitController
   return carrot_msg;
 }
 
-double RegulatedPurePursuitController::getLookAheadDistance(
+double VariableLookaheadRPP::getLookAheadDistance(
   const geometry_msgs::msg::Twist & speed)
 {
   // If using velocity-scaled look ahead distances, find and clamp the dist
@@ -150,7 +150,7 @@ double calculateCurvature(geometry_msgs::msg::Point lookahead_point)
   }
 }
 
-geometry_msgs::msg::TwistStamped RegulatedPurePursuitController::computeVelocityCommands(
+geometry_msgs::msg::TwistStamped VariableLookaheadRPP::computeVelocityCommands(
   const geometry_msgs::msg::PoseStamped & pose,
   const geometry_msgs::msg::Twist & speed,
   nav2_core::GoalChecker * goal_checker)
@@ -234,7 +234,7 @@ geometry_msgs::msg::TwistStamped RegulatedPurePursuitController::computeVelocity
   if (params_->use_collision_detection &&
     collision_checker_->isCollisionImminent(pose, linear_vel, angular_vel, carrot_dist))
   {
-    throw nav2_core::NoValidControl("RegulatedPurePursuitController detected collision ahead!");
+    throw nav2_core::NoValidControl("VariableLookaheadRPP detected collision ahead!");
   }
 
   // populate and return message
@@ -245,7 +245,7 @@ geometry_msgs::msg::TwistStamped RegulatedPurePursuitController::computeVelocity
   return cmd_vel;
 }
 
-bool RegulatedPurePursuitController::shouldRotateToPath(
+bool VariableLookaheadRPP::shouldRotateToPath(
   const geometry_msgs::msg::PoseStamped & carrot_pose, double & angle_to_path)
 {
   // Whether we should rotate robot to rough path heading
@@ -254,7 +254,7 @@ bool RegulatedPurePursuitController::shouldRotateToPath(
          fabs(angle_to_path) > params_->rotate_to_heading_min_angle;
 }
 
-bool RegulatedPurePursuitController::shouldRotateToGoalHeading(
+bool VariableLookaheadRPP::shouldRotateToGoalHeading(
   const geometry_msgs::msg::PoseStamped & carrot_pose)
 {
   // Whether we should rotate robot to goal heading
@@ -262,7 +262,7 @@ bool RegulatedPurePursuitController::shouldRotateToGoalHeading(
   return params_->use_rotate_to_heading && dist_to_goal < goal_dist_tol_;
 }
 
-void RegulatedPurePursuitController::rotateToHeading(
+void VariableLookaheadRPP::rotateToHeading(
   double & linear_vel, double & angular_vel,
   const double & angle_to_path, const geometry_msgs::msg::Twist & curr_speed)
 {
@@ -277,7 +277,7 @@ void RegulatedPurePursuitController::rotateToHeading(
   angular_vel = std::clamp(angular_vel, min_feasible_angular_speed, max_feasible_angular_speed);
 }
 
-geometry_msgs::msg::Point RegulatedPurePursuitController::circleSegmentIntersection(
+geometry_msgs::msg::Point VariableLookaheadRPP::circleSegmentIntersection(
   const geometry_msgs::msg::Point & p1,
   const geometry_msgs::msg::Point & p2,
   double r)
@@ -312,7 +312,7 @@ geometry_msgs::msg::Point RegulatedPurePursuitController::circleSegmentIntersect
   return p;
 }
 
-geometry_msgs::msg::PoseStamped RegulatedPurePursuitController::getLookAheadPoint(
+geometry_msgs::msg::PoseStamped VariableLookaheadRPP::getLookAheadPoint(
   const double & lookahead_dist,
   const nav_msgs::msg::Path & transformed_plan)
 {
@@ -345,7 +345,7 @@ geometry_msgs::msg::PoseStamped RegulatedPurePursuitController::getLookAheadPoin
   return *goal_pose_it;
 }
 
-void RegulatedPurePursuitController::applyConstraints(
+void VariableLookaheadRPP::applyConstraints(
   const double & curvature, const geometry_msgs::msg::Twist & /*curr_speed*/,
   const double & pose_cost, const nav_msgs::msg::Path & path, double & linear_vel, double & sign)
 {
@@ -376,12 +376,12 @@ void RegulatedPurePursuitController::applyConstraints(
   linear_vel = sign * linear_vel;
 }
 
-void RegulatedPurePursuitController::setPlan(const nav_msgs::msg::Path & path)
+void VariableLookaheadRPP::setPlan(const nav_msgs::msg::Path & path)
 {
   path_handler_->setPlan(path);
 }
 
-void RegulatedPurePursuitController::setSpeedLimit(
+void VariableLookaheadRPP::setSpeedLimit(
   const double & speed_limit,
   const bool & percentage)
 {
@@ -401,7 +401,7 @@ void RegulatedPurePursuitController::setSpeedLimit(
   }
 }
 
-double RegulatedPurePursuitController::findVelocitySignChange(
+double VariableLookaheadRPP::findVelocitySignChange(
   const nav_msgs::msg::Path & transformed_plan)
 {
   // Iterating through the transformed global path to determine the position of the cusp
@@ -447,9 +447,9 @@ double RegulatedPurePursuitController::findVelocitySignChange(
 
   return std::numeric_limits<double>::max();
 }
-}  // namespace nav2_regulated_pure_pursuit_controller
+}  // namespace rpp_variable_lookahead_controller
 
 // Register this controller as a nav2_core plugin
 PLUGINLIB_EXPORT_CLASS(
-  nav2_regulated_pure_pursuit_controller::RegulatedPurePursuitController,
+  rpp_variable_lookahead_controller::VariableLookaheadRPP,
   nav2_core::Controller)

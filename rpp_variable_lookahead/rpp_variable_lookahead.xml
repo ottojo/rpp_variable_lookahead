@@ -1,8 +1,8 @@
 <class_libraries>
-    <library path="nav2_regulated_pure_pursuit_controller">
-        <class type="nav2_regulated_pure_pursuit_controller::RegulatedPurePursuitController" base_class_type="nav2_core::Controller">
+    <library path="rpp_variable_lookahead_controller">
+        <class type="rpp_variable_lookahead_controller::VariableLookaheadRPP" base_class_type="nav2_core::Controller">
             <description>
-                nav2_regulated_pure_pursuit_controller
+                rpp_variable_lookahead_controller
             </description>
         </class>
     </library>
