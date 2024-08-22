@@ -39,6 +39,8 @@ struct Parameters
   double min_lookahead_dist;
   double lookahead_time;
   bool use_velocity_scaled_lookahead_dist;
+  double max_curvature;
+  bool use_curvature_scaled_lookahead_dist;
   double min_approach_linear_velocity;
   double approach_velocity_scaling_dist;
   double max_allowed_time_to_collision_up_to_carrot;

@@ -120,13 +120,17 @@ std::unique_ptr<geometry_msgs::msg::PointStamped> VariableLookaheadRPP::createCa
 }
 
 double VariableLookaheadRPP::getLookAheadDistance(
-  const geometry_msgs::msg::Twist & speed)
+  const geometry_msgs::msg::Twist & speed, const double & curvature)
 {
   // If using velocity-scaled look ahead distances, find and clamp the dist
   // Else, use the static look ahead distance
   double lookahead_dist = params_->lookahead_dist;
   if (params_->use_velocity_scaled_lookahead_dist) {
     lookahead_dist = fabs(speed.linear.x) * params_->lookahead_time;
+    lookahead_dist = std::clamp(
+      lookahead_dist, params_->min_lookahead_dist, params_->max_lookahead_dist);
+  } else if (params_->use_velocity_scaled_lookahead_dist){
+    lookahead_dist = params_->min_lookahead_dist + (fabs(curvature)/params_->max_curvature) * (params_->max_lookahead_dist - params_->min_lookahead_dist);
     lookahead_dist = std::clamp(
       lookahead_dist, params_->min_lookahead_dist, params_->max_lookahead_dist);
   }
@@ -174,8 +178,13 @@ geometry_msgs::msg::TwistStamped VariableLookaheadRPP::computeVelocityCommands(
     pose, params_->max_robot_pose_search_dist);
   global_path_pub_->publish(transformed_plan);
 
+  auto curvature_lookahead_pose = getLookAheadPoint(
+    params_->curvature_lookahead_dist,
+    transformed_plan);
+  auto curvature_at_curvature_lookahead_pose = calculateCurvature(curvature_lookahead_pose.pose.position);
+
   // Find look ahead distance and point on path and publish
-  double lookahead_dist = getLookAheadDistance(speed);
+  double lookahead_dist = getLookAheadDistance(speed, curvature_at_curvature_lookahead_pose);
 
   // Check for reverse driving
   if (params_->allow_reversing) {
@@ -198,10 +207,7 @@ geometry_msgs::msg::TwistStamped VariableLookaheadRPP::computeVelocityCommands(
 
   double regulation_curvature = lookahead_curvature;
   if (params_->use_fixed_curvature_lookahead) {
-    auto curvature_lookahead_pose = getLookAheadPoint(
-      params_->curvature_lookahead_dist,
-      transformed_plan);
-    regulation_curvature = calculateCurvature(curvature_lookahead_pose.pose.position);
+    regulation_curvature = curvature_at_curvature_lookahead_pose;
   }
 
   // Setting the velocity direction
