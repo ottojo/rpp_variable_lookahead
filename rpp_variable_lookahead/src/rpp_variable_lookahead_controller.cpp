@@ -14,11 +14,15 @@
 // limitations under the License.
 
 #include <algorithm>
+#include <cmath>
+#include <geometry_msgs/msg/detail/point__struct.hpp>
+#include <nav_msgs/msg/detail/path__struct.hpp>
 #include <string>
 #include <limits>
 #include <memory>
 #include <vector>
 #include <utility>
+#include <angles/angles.h>
 
 #include "rpp_variable_lookahead_controller/rpp_variable_lookahead_controller.hpp"
 #include "nav2_core/controller_exceptions.hpp"
@@ -108,6 +112,38 @@ void VariableLookaheadRPP::deactivate()
   carrot_pub_->on_deactivate();
 }
 
+double curvatureNear(const nav_msgs::msg::Path &trajectory,
+                     geometry_msgs::msg::Point point) {
+
+  int index =
+      std::min_element(trajectory.poses.begin(), trajectory.poses.end(),
+                       [&](const geometry_msgs::msg::PoseStamped &poseA,
+                           const geometry_msgs::msg::PoseStamped &poseB) {
+                         return std::hypot(poseA.pose.position.x - point.x,
+                                           poseA.pose.position.y - point.y) <
+                                std::hypot(poseB.pose.position.x - point.x,
+                                           poseB.pose.position.y - point.y);
+                       }) -
+      trajectory.poses.begin();
+
+  if (index <= 0) {
+    index = 1;
+  }
+  if (index >= (int)trajectory.poses.size()) {
+    index = trajectory.poses.size() - 1;
+  }
+
+  double angle1 = tf2::getYaw(trajectory.poses.at(index - 1).pose.orientation);
+  double angle2 = tf2::getYaw(trajectory.poses.at(index).pose.orientation);
+
+  double angle = angles::shortest_angular_distance(angle1, angle2);
+  return (2 * angle) /
+         std::hypot(trajectory.poses.at(index).pose.position.x -
+                        trajectory.poses.at(index - 1).pose.position.x,
+                    trajectory.poses.at(index).pose.position.y -
+                        trajectory.poses.at(index - 1).pose.position.y);
+}
+
 std::unique_ptr<geometry_msgs::msg::PointStamped> VariableLookaheadRPP::createCarrotMsg(
   const geometry_msgs::msg::PoseStamped & carrot_pose)
 {
@@ -129,10 +165,11 @@ double VariableLookaheadRPP::getLookAheadDistance(
     lookahead_dist = fabs(speed.linear.x) * params_->lookahead_time;
     lookahead_dist = std::clamp(
       lookahead_dist, params_->min_lookahead_dist, params_->max_lookahead_dist);
-  } else if (params_->use_velocity_scaled_lookahead_dist){
-    lookahead_dist = params_->min_lookahead_dist + (fabs(curvature)/params_->max_curvature) * (params_->max_lookahead_dist - params_->min_lookahead_dist);
+  } else if (params_->use_curvature_scaled_lookahead_dist){
+    lookahead_dist = params_->max_lookahead_dist - (fabs(curvature)/params_->max_curvature) * (params_->max_lookahead_dist - params_->min_lookahead_dist);
     lookahead_dist = std::clamp(
       lookahead_dist, params_->min_lookahead_dist, params_->max_lookahead_dist);
+      std::cout << "curvature: " << curvature << ", lookahead distance: " << lookahead_dist << "\n";
   }
 
   return lookahead_dist;
@@ -181,7 +218,11 @@ geometry_msgs::msg::TwistStamped VariableLookaheadRPP::computeVelocityCommands(
   auto curvature_lookahead_pose = getLookAheadPoint(
     params_->curvature_lookahead_dist,
     transformed_plan);
-  auto curvature_at_curvature_lookahead_pose = calculateCurvature(curvature_lookahead_pose.pose.position);
+  geometry_msgs::msg::Point origin;
+  origin.x = 0;
+  origin.y = 0;
+  origin.z = 0;
+  auto curvature_at_curvature_lookahead_pose =curvatureNear(transformed_plan, origin);// curvature_lookahead_pose.pose.position);
 
   // Find look ahead distance and point on path and publish
   double lookahead_dist = getLookAheadDistance(speed, curvature_at_curvature_lookahead_pose);
@@ -207,7 +248,7 @@ geometry_msgs::msg::TwistStamped VariableLookaheadRPP::computeVelocityCommands(
 
   double regulation_curvature = lookahead_curvature;
   if (params_->use_fixed_curvature_lookahead) {
-    regulation_curvature = curvature_at_curvature_lookahead_pose;
+    regulation_curvature = calculateCurvature(curvature_lookahead_pose.pose.position);
   }
 
   // Setting the velocity direction
