@@ -57,7 +57,7 @@ public:
 
   double getLookAheadDistanceWrapper(const geometry_msgs::msg::Twist & twist)
   {
-    return getLookAheadDistance(twist);
+    return getLookAheadDistance(twist, 0);
   }
 
   static geometry_msgs::msg::Point circleSegmentIntersectionWrapper(

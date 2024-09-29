@@ -53,6 +53,11 @@ ParameterHandler::ParameterHandler(
     node, plugin_name_ + ".use_velocity_scaled_lookahead_dist",
     rclcpp::ParameterValue(false));
   declare_parameter_if_not_declared(
+    node, plugin_name_ + ".max_curvature", rclcpp::ParameterValue(0.5));
+  declare_parameter_if_not_declared(
+    node, plugin_name_ + ".use_curvature_scaled_lookahead_dist",
+    rclcpp::ParameterValue(false));
+  declare_parameter_if_not_declared(
     node, plugin_name_ + ".min_approach_linear_velocity", rclcpp::ParameterValue(0.05));
   declare_parameter_if_not_declared(
     node, plugin_name_ + ".approach_velocity_scaling_dist",
@@ -110,6 +115,10 @@ ParameterHandler::ParameterHandler(
   node->get_parameter(
     plugin_name_ + ".use_velocity_scaled_lookahead_dist",
     params_.use_velocity_scaled_lookahead_dist);
+  node->get_parameter(plugin_name_ + ".max_curvature", params_.max_curvature);
+  node->get_parameter(
+    plugin_name_ + ".use_curvature_scaled_lookahead_dist",
+    params_.use_curvature_scaled_lookahead_dist);
   node->get_parameter(
     plugin_name_ + ".min_approach_linear_velocity",
     params_.min_approach_linear_velocity);
@@ -223,6 +232,8 @@ ParameterHandler::dynamicParametersCallback(
         params_.min_lookahead_dist = parameter.as_double();
       } else if (name == plugin_name_ + ".lookahead_time") {
         params_.lookahead_time = parameter.as_double();
+      } else if (name == plugin_name_ + ".max_curvature") {
+        params_.max_curvature = parameter.as_double();
       } else if (name == plugin_name_ + ".rotate_to_heading_angular_vel") {
         params_.rotate_to_heading_angular_vel = parameter.as_double();
       } else if (name == plugin_name_ + ".min_approach_linear_velocity") {
@@ -247,7 +258,9 @@ ParameterHandler::dynamicParametersCallback(
     } else if (type == ParameterType::PARAMETER_BOOL) {
       if (name == plugin_name_ + ".use_velocity_scaled_lookahead_dist") {
         params_.use_velocity_scaled_lookahead_dist = parameter.as_bool();
-      } else if (name == plugin_name_ + ".use_regulated_linear_velocity_scaling") {
+      } else if (name == plugin_name_ + ".use_curvature_scaled_lookahead_dist") {
+        params_.use_curvature_scaled_lookahead_dist = parameter.as_bool();
+      }  else if (name == plugin_name_ + ".use_regulated_linear_velocity_scaling") {
         params_.use_regulated_linear_velocity_scaling = parameter.as_bool();
       } else if (name == plugin_name_ + ".use_fixed_curvature_lookahead") {
         params_.use_fixed_curvature_lookahead = parameter.as_bool();
